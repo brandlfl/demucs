@@ -8,7 +8,6 @@ import argparse
 import sys
 from pathlib import Path
 
-from dora.log import fatal
 import torch as th
 
 from .api import Separator, save_audio, list_models
@@ -16,6 +15,7 @@ from .api import Separator, save_audio, list_models
 from .apply import BagOfModels
 from .htdemucs import HTDemucs
 from .pretrained import add_model_flags, ModelLoadingError
+from .utils import fatal
 
 
 def get_parser():
@@ -154,7 +154,8 @@ def main(opts=None):
                 stem=args.stem, sources=", ".join(separator.model.sources)
             )
         )
-    out = args.out / args.name
+    # e.g. for `-n hf://someuser/somemodel`, use `someuser_somemodel` as the folder name.
+    out = args.out / args.name.replace('hf://', '').replace('/', '_')
     out.mkdir(parents=True, exist_ok=True)
     print(f"Separated tracks will be stored in {out.resolve()}")
     for track in args.tracks:
