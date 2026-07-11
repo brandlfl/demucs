@@ -118,7 +118,17 @@ Anaconda console.
 
 ### For musicians
 
-If you just want to use Demucs to separate tracks, you can install it with
+If you just want to use Demucs to separate tracks, the quickest way is
+[uv](https://docs.astral.sh/uv/), with no install step at all:
+
+```bash
+uvx demucs MY_TRACK.mp3
+```
+
+Note for Intel (non Apple Silicon) Macs: PyTorch stopped supporting them after
+version 2.2, which requires Python at most 3.12, so use `uvx --python 3.12 demucs`.
+
+Alternatively, you can install it with
 
 ```bash
 python3 -m pip install -U demucs
@@ -126,7 +136,7 @@ python3 -m pip install -U demucs
 
 For bleeding edge versions, you can install directly from this repo using
 ```bash
-python3 -m pip install -U git+https://github.com/facebookresearch/demucs#egg=demucs
+python3 -m pip install -U git+https://github.com/adefossez/demucs#egg=demucs
 ```
 
 Advanced OS support are provided on the following page, **you must read the page for your OS before posting an issues**:
@@ -136,16 +146,14 @@ Advanced OS support are provided on the following page, **you must read the page
 
 ### For machine learning scientists
 
-If you have anaconda installed, you can run from the root of this repository:
+From the root of this repository, run:
 
 ```bash
-conda env update -f environment-cpu.yml  # if you don't have GPUs
-conda env update -f environment-cuda.yml # if you have GPUs
-conda activate demucs
-pip install -e .
+uv sync --extra train
 ```
 
-This will create a `demucs` environment with all the dependencies installed.
+This will create a `.venv` environment with all the dependencies installed,
+which the `Makefile` targets (`make tests`, `make linter`) use through `uv run`.
 
 You will also need to install [soundstretch/soundtouch](https://www.surina.net/soundtouch/soundstretch.html): on macOS you can do `brew install sound-touch`,
 and on Ubuntu `sudo apt-get install soundstretch`. This is used for the
