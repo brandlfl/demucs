@@ -1,28 +1,19 @@
 # macOS support for Demucs
 
-If you have a sufficiently recent version of macOS, you can just run
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), for instance
+with Homebrew (`brew install uv`). uv takes care of installing Python for you, there
+is nothing else to install. Then, anytime you want to use demucs, just run
 
 ```bash
-python3 -m pip install --user -U demucs
-# Then anytime you want to use demucs, just do
-python3 -m demucs -d cpu PATH_TO_AUDIO_FILE_1
-# If you have added the user specific pip bin/ folder to your path, you can also do
-demucs -d cpu PATH_TO_AUDIO_FILE_1
+uvx demucs PATH_TO_AUDIO_FILE_1
 ```
 
-If you do not already have Anaconda installed or much experience with the terminal on macOS, here are some detailed instructions:
+On Apple Silicon, the GPU is used automatically through Metal (MPS). If this gives
+you trouble, you can force CPU separation with `-d cpu`.
 
-1. Download [Anaconda 3.8 (or more recent) 64-bit for macOS][anaconda]:
-2. Open [Anaconda Prompt in macOS][prompt]
-3. Follow these commands:
-```bash
-conda activate
-pip3 install -U demucs
-# Then anytime you want to use demucs, first do conda activate, then
-demucs -d cpu PATH_TO_AUDIO_FILE_1
-```
+**Note for Intel (non Apple Silicon) Macs**: PyTorch stopped supporting them after
+version 2.2, which requires Python at most 3.12, so use `uvx --python 3.12 demucs`.
 
-**Important, torchaudio 0.12 update:** Torchaudio no longer supports decoding mp3s without ffmpeg installed. You must have ffmpeg installed, either through Anaconda (`conda install ffmpeg -c conda-forge`) or with Homebrew for instance (`brew install ffmpeg`).
-
-[anaconda]:  https://www.anaconda.com/download
-[prompt]: https://docs.anaconda.com/anaconda/user-guide/getting-started/#open-nav-mac
+Optionally, install [ffmpeg](https://ffmpeg.org/) (`brew install ffmpeg`): it is
+required for flac output and for reading the more exotic audio formats (wav, flac,
+mp3, ogg, aac, etc. are decoded natively).

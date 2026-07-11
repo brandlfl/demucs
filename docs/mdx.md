@@ -5,8 +5,8 @@ please follow the instructions hereafter
 
 ## Installing Demucs
 
-Follow the instructions from the [main README](https://github.com/facebookresearch/demucs#requirements)
-in order to setup Demucs using Anaconda. You will need the full setup up for training, including soundstretch.
+Follow the instructions from the [main README](https://github.com/adefossez/demucs#requirements)
+in order to setup Demucs. You will need the full setup up for training, including soundstretch.
 
 ## Getting MusDB-HQ
 
