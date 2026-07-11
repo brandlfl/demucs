@@ -1,6 +1,6 @@
 # Release notes for Demucs
 
-## V4.1.0a, TBD
+## V4.1.0, 11th of July 2026
 
 **Packaging overhaul**: the project now uses `pyproject.toml` with the hatchling build
 backend, and is developed with [uv](https://docs.astral.sh/uv/). The requirements files
