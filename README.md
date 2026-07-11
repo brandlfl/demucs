@@ -1,7 +1,7 @@
 # Demucs Music Source Separation
 
-![tests badge](https://github.com/facebookresearch/demucs/workflows/tests/badge.svg)
-![linter badge](https://github.com/facebookresearch/demucs/workflows/linter/badge.svg)
+![tests badge](https://github.com/adefossez/demucs/workflows/tests/badge.svg)
+![linter badge](https://github.com/adefossez/demucs/workflows/linter/badge.svg)
 
 
 **This is the officially maintained Demucs** now that I (Alexandre Défossez) have left Meta to join [Kyutai](https://twitter.com/kyutai_labs).
@@ -104,17 +104,16 @@ for more details.
 
 ## Requirements
 
-You will need at least Python 3.10. Installing the `demucs` package (e.g. `pip install demucs`)
-comes with everything needed for separation. To train a new model, install the `train` extra
-(`pip install "demucs[train]"`), and to use the diffq quantized models (e.g. `mdx_q`,
-`mdx_extra_q`), install the `quantized` extra (`pip install "demucs[quantized]"`).
-For development, the repo is managed with [uv](https://docs.astral.sh/uv/): `uv sync --extra train`
-sets up everything, and the `Makefile` targets run through `uv run`.
+You will need at least Python 3.10. All the instructions hereafter rely on
+[uv](https://docs.astral.sh/uv/) (which provides the `uvx` command), although the `demucs`
+package can also be installed with plain `pip`. The package comes with everything needed
+for separation. Two extras are available: `train` to train a new model (see the
+[training doc](docs/training.md)), and `quantized` for the diffq quantized models
+(e.g. `uvx "demucs[quantized]" -n mdx_q MY_TRACK.mp3`).
 
-### For Windows users
-
-Everytime you see `python3`, replace it with `python.exe`. You should always run commands from the
-Anaconda console.
+Having `ffmpeg` installed is recommended but optional: it is required for flac output,
+and for reading the audio formats that [sphn](https://github.com/kyutai-labs/sphn)
+does not decode.
 
 ### For musicians
 
@@ -128,15 +127,18 @@ uvx demucs MY_TRACK.mp3
 Note for Intel (non Apple Silicon) Macs: PyTorch stopped supporting them after
 version 2.2, which requires Python at most 3.12, so use `uvx --python 3.12 demucs`.
 
-Alternatively, you can install it with
+To install it permanently as a command line tool, run
 
 ```bash
-python3 -m pip install -U demucs
+uv tool install demucs
 ```
 
-For bleeding edge versions, you can install directly from this repo using
+after which `demucs MY_TRACK.mp3` just works (`python3 -m pip install -U demucs`
+works too if you prefer pip).
+
+For bleeding edge versions, you can run directly from this repo using
 ```bash
-python3 -m pip install -U git+https://github.com/adefossez/demucs#egg=demucs
+uvx --from git+https://github.com/adefossez/demucs demucs MY_TRACK.mp3
 ```
 
 Advanced OS support are provided on the following page, **you must read the page for your OS before posting an issues**:
@@ -194,19 +196,20 @@ Audiostrip is providing free online separation with Demucs on their website [htt
 
 ## Separating tracks
 
-In order to try Demucs, you can just run from any folder (as long as you properly installed it)
+In order to try Demucs, you can just run from any folder (replace `uvx demucs` with
+just `demucs` if you installed it with `uv tool install` or `pip`)
 
 ```bash
-demucs PATH_TO_AUDIO_FILE_1 [PATH_TO_AUDIO_FILE_2 ...]   # for Demucs
-# If you used `pip install --user` you might need to replace demucs with python3 -m demucs
-python3 -m demucs --mp3 --mp3-bitrate BITRATE PATH_TO_AUDIO_FILE_1  # output files saved as MP3
+uvx demucs PATH_TO_AUDIO_FILE_1 [PATH_TO_AUDIO_FILE_2 ...]   # for Demucs
+uvx demucs --mp3 --mp3-bitrate BITRATE PATH_TO_AUDIO_FILE_1  # output files saved as MP3
         # use --mp3-preset to change encoder preset, 2 for best quality, 7 for fastest
 # If your filename contain spaces don't forget to quote it !!!
-demucs "my music/my favorite track.mp3"
-# You can select different models with `-n` mdx_q is the quantized model, smaller but maybe a bit less accurate.
-demucs -n mdx_q myfile.mp3
+uvx demucs "my music/my favorite track.mp3"
+# You can select different models with `-n`, mdx_q is the quantized model, smaller but maybe a bit less accurate.
+# Note that the quantized models require the `quantized` extra.
+uvx "demucs[quantized]" -n mdx_q myfile.mp3
 # If you only want to separate vocals out of an audio, use `--two-stems=vocals` (You can also set to drums or bass)
-demucs --two-stems=vocals myfile.mp3
+uvx demucs --two-stems=vocals myfile.mp3
 ```
 
 
@@ -217,11 +220,14 @@ Creating an environment variable `PYTORCH_NO_CUDA_MEMORY_CACHING=1` is also help
 Separated tracks are stored in the `separated/MODEL_NAME/TRACK_NAME` folder. There you will find four stereo wav files sampled at 44.1 kHz: `drums.wav`, `bass.wav`,
 `other.wav`, `vocals.wav` (or `.mp3` if you used the `--mp3` option).
 
-All audio formats supported by `torchaudio` can be processed (i.e. wav, mp3, flac, ogg/vorbis on Linux/macOS, etc.). On Windows, `torchaudio` has limited support, so we rely on `ffmpeg`, which should support pretty much anything.
+All audio formats supported by [sphn](https://github.com/kyutai-labs/sphn) can be processed
+directly (wav, flac, mp3, ogg, aac...). Other formats are handled through `ffmpeg` when it
+is installed, which should support pretty much anything.
 Audio is resampled on the fly if necessary.
 The output will be a wav file encoded as int16.
 You can save as float32 wav files with `--float32`, or 24 bits integer wav with `--int24`.
-You can pass `--mp3` to save as mp3 instead, and set the bitrate (in kbps) with `--mp3-bitrate` (default is 320).
+You can pass `--mp3` to save as mp3 instead, and set the bitrate (in kbps) with `--mp3-bitrate` (default is 320),
+or `--flac` to save as flac (this requires `ffmpeg` to be installed).
 
 It can happen that the output would need clipping, in particular due to some separation artifacts.
 Demucs will automatically rescale each output stem so as to avoid clipping. This can however break
@@ -255,7 +261,7 @@ The `--overlap` option controls the amount of overlap between prediction windows
 It can probably be reduced to 0.1 to improve a bit speed.
 
 
-The `-j` flag allow to specify a number of parallel jobs (e.g. `demucs -j 2 myfile.mp3`).
+The `-j` flag allow to specify a number of parallel jobs (e.g. `uvx demucs -j 2 myfile.mp3`).
 This will multiply by the same amount the RAM used so be careful!
 
 ### Memory requirements for GPU acceleration
